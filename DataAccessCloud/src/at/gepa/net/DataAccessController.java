@@ -76,5 +76,16 @@ public class DataAccessController {
 		lastModified = lm;
 	}
 	
+	private String subFolder;
+	public String getSubFolder() {
+		if( subFolder == null )
+			subFolder = "";
+		return subFolder;
+	}
+	public void setSubFolder(String f)
+	{
+		subFolder = f;
+	}
+	
 	
 }

@@ -3,7 +3,9 @@ package at.gepa.ws.publicholiday;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import at.gepa.lib.tools.time.TimeTool;
 import at.gepa.lib.tools.time.TimeUtil;
@@ -181,6 +183,13 @@ implements IElement
 		String ret = getName() + DELIM;
 		ret += TimeTool.toString( this.date, DATE_FORMAT) + DELIM;
 		
+		return ret;
+	}
+	@Override
+	public List<String> getKeyList() {
+		ArrayList<String> ret = new ArrayList<String>();
+		ret.add(getPrefix(0));
+		ret.add(getPrefix(1));
 		return ret;
 	}
 }

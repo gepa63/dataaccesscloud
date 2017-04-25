@@ -134,7 +134,7 @@ public class DataAccessFTPController extends DataAccessController {
 	}
 	public URL getHttpURL(String fname) throws MalformedURLException 
 	{
-		return new URL( "http://"+getFtpLink()+ "/" + getUserAccess().getUserName() +"/" + fname );
+		return new URL( "http://"+getFtpLink()+ buildSubFolder("/") + getUserAccess().getUserName() +"/" + fname );
 	}
 	
 	@Override
@@ -157,9 +157,37 @@ public class DataAccessFTPController extends DataAccessController {
 	}
 
 	public String buildLink(String file) {
-		String ret = "ftp://"+userAccess.getUserName() +":"+userAccess.getPassword()+"@"+getFtpLink()+getSubFolder()+":" + getFtpPort() + "/" + file;
+		String ret = "ftp://"+userAccess.getUserName();
+		ret += ":"+userAccess.getPassword();
+		ret += "@";
+		ret += getFtpLink();
+		ret += ":";
+		ret += getFtpPort();
+		ret += buildSubFolder("/");
+		ret += file;
+		
 		return ret;
 	}
+	private String buildSubFolder(String defaultValue) {
+		String sf = getSubFolder();
+		if( sf == null )
+			sf = defaultValue;
+		else if( !sf.isEmpty() )
+		{
+			if( !sf.startsWith("/") )
+			{
+				sf = "/" + sf;
+			}
+			if( !sf.endsWith("/") )
+			{
+				sf = sf + "/";
+			}
+		}
+		else
+			sf = defaultValue;
+		return sf;
+	}
+
 	@Override
 	public String getFileName() {
 		String fName = super.getFileName();

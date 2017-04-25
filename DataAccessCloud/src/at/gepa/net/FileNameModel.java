@@ -81,8 +81,13 @@ public class FileNameModel {
             }
         }
         filename = url.getFile();
-        if( filename.startsWith("/") )
-        	filename = filename.substring(1);
+        int idx = filename.lastIndexOf('/');
+        //if( filename.startsWith("/") )
+        if( idx >= 0 )
+        {
+        	subFolder = filename.substring(0, idx);
+        	filename = filename.substring(idx+1);
+        }
 	}
 	
 	public String getFilename() {
@@ -98,6 +103,15 @@ public class FileNameModel {
 	}
 	public String getHost() {
 		return hostName;
+	}
+	private String subFolder;
+	
+	public String getSubFolder() {
+		if( subFolder == null ) return "";
+		return subFolder;
+	}
+	public void setSubFolder(String sf) {
+		subFolder = sf;
 	}
 }
 

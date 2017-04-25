@@ -38,6 +38,7 @@ public class DataAccess {
 			try{
 				at.gepa.lib.tools.security.BasicUser buser = at.gepa.lib.tools.security.BasicUser.createInstance(user, pwd);
 				dac = new DataAccessFTPController(fname, ftplink, ftpPort, buser );
+				dac.setSubFolder(subpath);
 			}
 			catch(Exception ex)
 			{
@@ -48,6 +49,7 @@ public class DataAccess {
 		{
 			type = eAccessType.Dropbox;
 			dac = new DataAccessCloudControllerDropbox(fname, accessKey, secretKey );
+			dac.setSubFolder(subpath);
 		}
 		else
 		{
@@ -127,6 +129,11 @@ public class DataAccess {
 		}
 		return "";
 	}
+	public String getSubFolder() 
+	{
+		return controller.getSubFolder();
+	}
+	
 	public String getFileName() {
 		return controller.getFileName();
 	}
@@ -366,7 +373,8 @@ public class DataAccess {
 			try {
 				url = new URL(fnm.getPath());
 				fnm.evalURLParts(url);
-				return DataAccess.createInstance(fnm.getFilename(), fnm.getUsername(), fnm.getPassword(), fnm.getHost(), "", url.getPort());
+				String fn = fnm.getFilename();
+				return DataAccess.createInstance(fn, fnm.getUsername(), fnm.getPassword(), fnm.getHost(), fnm.getSubFolder(), url.getPort());
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			}

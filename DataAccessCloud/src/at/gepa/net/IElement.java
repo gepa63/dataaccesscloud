@@ -1,5 +1,7 @@
 package at.gepa.net;
 
+import java.util.List;
+
 
 
 public interface IElement
@@ -13,4 +15,5 @@ extends IWriteable
 	public Class<?> getType(int page);
 	public int getLines(int page);
 	public String getPrefix(int page);
+	public List<String> getKeyList();
 }
