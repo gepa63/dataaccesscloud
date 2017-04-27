@@ -7,5 +7,7 @@
 	<classpathentry kind="lib" path="libs/itextg-5.5.8.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GePaLibTools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GePaToolsSecurity"/>
+	<classpathentry kind="lib" path="libs/azure-storage-4.0.0.jar"/>
+	<classpathentry kind="lib" path="libs/jackson-core-2.6.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
