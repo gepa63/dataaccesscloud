@@ -8,10 +8,11 @@ public class FileNameModel {
 	public FileNameModel(String pathToFile) 
 	{
 		this.pathToFile = pathToFile;
+		localFile = false;
 	}
 	public boolean isLocalFile() 
 	{
-		return FileNameModel.isLocalFile(pathToFile);
+		return localFile || FileNameModel.isLocalFile(pathToFile);
 	}
 	public boolean isURL() 
 	{
@@ -112,6 +113,11 @@ public class FileNameModel {
 	}
 	public void setSubFolder(String sf) {
 		subFolder = sf;
+	}
+	
+	private boolean localFile;
+	public void setIsLocalFile(boolean b) {
+		localFile = b;
 	}
 }
 

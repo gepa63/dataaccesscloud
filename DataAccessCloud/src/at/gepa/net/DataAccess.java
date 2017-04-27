@@ -13,7 +13,6 @@ import at.gepa.net.DataAccessCloudControllerDropbox.IDropboxSessionHandler;
 
 
 public class DataAccess {
-
 	public static enum eAccessType
 	{
 		LocalFile,
@@ -21,10 +20,12 @@ public class DataAccess {
 		HttpAccess,
 		Dropbox,
 		S3CloudeAccessAmazonGoogle,
+		Azure,
+		AzureAndroid,
 		Unknown
 	}
 
-	private eAccessType accessType;
+	protected eAccessType accessType;
 	private DataAccessController controller;
 	
 	public static DataAccess createInstance(String fname, String user, String pwd, String ftplink, String subpath, int ftpPort, String accessKey, String secretKey, String cloudBucket )
@@ -49,6 +50,13 @@ public class DataAccess {
 		{
 			type = eAccessType.Dropbox;
 			dac = new DataAccessCloudControllerDropbox(fname, accessKey, secretKey );
+			dac.setSubFolder(subpath);
+		}
+		else if( accessKey != null && !accessKey.isEmpty() && secretKey != null && !secretKey.isEmpty() && cloudBucket != null || !cloudBucket.isEmpty() )
+		{
+			type = eAccessType.Azure;
+			//String account, String key, String filename, String container
+			dac = new DataAccessAzureController(accessKey, secretKey, fname, cloudBucket );
 			dac.setSubFolder(subpath);
 		}
 		else
@@ -79,10 +87,15 @@ public class DataAccess {
 			return DataAccessDropbox.uploadFile( getDropboxController(), list, uploadTask, headerFactory);
 		case HttpAccess:
 			return DataAccessHTTP.uploadHttpFile( getHttpController(), list, uploadTask, headerFactory);
+		case Azure:
+			return DataAccessAzure.uploadFile( getAzureController(), list, uploadTask, headerFactory );
 		default:
 			break;
 		}
 		return null;
+	}
+	protected DataAccessAzureController getAzureController() {
+		return (DataAccessAzureController)this.controller;
 	}
 	private DataAccessHTTPController getHttpController() {
 		return (DataAccessHTTPController)this.controller;
@@ -104,6 +117,8 @@ public class DataAccess {
 			return DataAccessHTTP.downloadFile(getHttpController(), downloadTask, list);
 		case Dropbox:
 			return DataAccessDropbox.downloadFile( getDropboxController(), downloadTask, list, readHeaderListener);
+		case Azure:
+			return DataAccessAzure.downloadFile( getAzureController(), downloadTask, list, readHeaderListener );
 		default:
 			break;
 		}
@@ -218,6 +233,8 @@ public class DataAccess {
 		case S3CloudeAccessAmazonGoogle:
 		case Dropbox:
 			return getCloudController().getAccessKey();
+		case Azure:
+			return getAzureController().getAccount();
 		case FTPAccess:
 		case LocalFile:
 		default:
@@ -231,6 +248,8 @@ public class DataAccess {
 		case S3CloudeAccessAmazonGoogle:
 		case Dropbox:
 			return getCloudController().getSecretKey();
+		case Azure:
+			return getAzureController().getKey();
 		case FTPAccess:
 		case LocalFile:
 		default:
@@ -243,6 +262,8 @@ public class DataAccess {
 		{
 		case S3CloudeAccessAmazonGoogle:
 			return getCloudController().getCloudBucket();
+		case Azure:
+			return getAzureController().getContainer();
 		case FTPAccess:
 		case LocalFile:
 		case Dropbox:
@@ -290,6 +311,9 @@ public class DataAccess {
 		case FTPAccess:
 			getFtpController().validate();
 			break;
+		case Azure:
+			getAzureController().validate();
+			break;
 		case S3CloudeAccessAmazonGoogle:
 		case Dropbox:
 			getCloudController().validate();
@@ -319,9 +343,17 @@ public class DataAccess {
 	public static DataAccess createInstance(String filename, String username, String pwd, String ftpLink, String subpath, int port) {
 		return createInstance(filename, username, pwd, ftpLink, subpath, port, "", "", "" );
 	}
+ 
+	public static DataAccess createInstance(String filename, String account, String key, String container) {
+		return createInstance(filename, "", "", "", "", -1, account, key, container );
+	}
 	public boolean isFTPActive() 
 	{
 		return ( accessType == eAccessType.FTPAccess );
+	}
+	public boolean isAzureActive() 
+	{
+		return ( accessType == eAccessType.Azure );
 	}
 	public boolean isLocalFileActive() {
 		return ( accessType == eAccessType.LocalFile );
@@ -412,6 +444,7 @@ public class DataAccess {
 		case LocalFile:
 			controller.createLocalFileIfNotExists();
 			break;
+		case Azure:
 		case FTPAccess:
 		case S3CloudeAccessAmazonGoogle:
 		case Dropbox:
@@ -460,6 +493,11 @@ public class DataAccess {
 			lines = DataAccessFTP.copy( fromFile, (DataAccessFTPController)controller );
 			e2Throw = new Exception( lines + " Cachezeilen erfolgreich nach '"+controller.getFileName()+"' hochgeladen" );
 			break;
+		case Azure:
+			DataAccessAzure.backupFileIfExists( (DataAccessAzureController)controller, ".backup" );
+			lines = DataAccessAzure.copy( fromFile, (DataAccessAzureController)controller );
+			e2Throw = new Exception( lines + " Cachezeilen erfolgreich nach '"+controller.getFileName()+"' hochgeladen" );
+			break;
 		case LocalFile:
 			String currentFile = getFileName();
 			
@@ -491,5 +529,17 @@ public class DataAccess {
 	}
 	public long getLastModified() {
 		return controller.getLastModified();
+	}
+	public String getAzureAccount() {
+		return getAzureController().getAccount();
+	}
+	public String getAzureKey() {
+		return getAzureController().getKey();
+	}
+	public String getAzureContainer() {
+		return getAzureController().getContainer();
+	}
+	public DataAccessController getController() {
+		return controller;
 	}
 }
